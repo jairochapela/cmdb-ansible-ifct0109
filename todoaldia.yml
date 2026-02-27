@@ -1,0 +1,16 @@
+---
+  - name: "TodoAlDia"
+    hosts: servidores
+    become: yes
+    tasks:
+      - name: "Actualizar APT"
+        ansible.builtin.apt:
+          update_cache: yes
+          upgrade: dist
+      - name: "Comprobar si hace falta reiniciar"
+        ansible.builtin.stat:
+          path: /var/run/reboot-required
+        register: fai_falta_reiniciar
+      - name: "Reiniciar"
+        ansible.builtin.reboot:
+        when: fai_falta_reiniciar.stat.exists == true

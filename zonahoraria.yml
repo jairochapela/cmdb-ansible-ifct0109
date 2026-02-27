@@ -1,0 +1,14 @@
+---
+  - name: "Zona Horaria"
+    hosts: servidores
+    become: yes
+    tasks:
+      - name: "Ajustar zona horaria"
+        ansible.builtin.timezone:
+          name: "{{mi_zona_horaria}}"
+      - name: "Hora local"
+        ansible.builtin.command: "date"
+        register: hora_local
+      - name: "Verificación"
+        ansible.builtin.debug:
+          var: hora_local
