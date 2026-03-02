@@ -18,15 +18,21 @@
  owner /etc/nginx/* r,
  owner /etc/nginx/conf.d/ r,
  owner /etc/nginx/modules-enabled/ r,
- owner /etc/nginx/sites-available/* r,
- owner /etc/nginx/sites-enabled/* r,
+ /etc/nginx/sites-available/ r,
+ /etc/nginx/sites-available/* r,
+ /etc/nginx/sites-enabled/ r,
+ /etc/nginx/sites-enabled/* r,
  owner /proc/sys/kernel/random/boot_id r,
  owner /run/nginx.pid rw,
  owner /usr/share/nginx/modules-available/* r,
  
-   # Denegaciones explícitas formativas
-  deny /home/** rw,
-  deny /root/** rw,
-  deny /etc/shadow r,
-}
+ # Permitir red TCP
+ network inet stream,
+ network inet6 stream,
 
+ # Denegaciones explícitas formativas
+ deny /home/** rw,
+ deny /root/** rw,
+ deny /etc/shadow r,
+}
+	
