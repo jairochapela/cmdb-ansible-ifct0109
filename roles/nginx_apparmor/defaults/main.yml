@@ -1,0 +1,7 @@
+nginx_site_name: secure_site
+nginx_port: 8000
+
+nginx_root_dir: "/var/www/{{ nginx_site_name }}"
+nginx_log_dir: "/var/log/nginx"
+
+apparmor_mode: enforce   # enforce | complain

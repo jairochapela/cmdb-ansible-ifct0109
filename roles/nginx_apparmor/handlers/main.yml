@@ -1,0 +1,10 @@
+- name: Reload AppArmor
+  command: apparmor_parser -r /etc/apparmor.d/usr.sbin.nginx
+
+- name: Set AppArmor mode
+  command: "aa-{{ apparmor_mode }} usr.sbin.nginx"
+
+- name: Restart nginx
+  systemd:
+    name: nginx
+    state: restarted

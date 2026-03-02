@@ -1,0 +1,101 @@
+- name: Instalar nginx y apparmor
+  apt:
+    name:
+      - nginx
+      - apparmor
+      - apparmor-utils
+    state: present
+    update_cache: yes
+
+- name: Crear directorio del sitio
+  file:
+    path: "{{ nginx_root_dir }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Crear página de prueba
+  copy:
+    dest: "{{ nginx_root_dir }}/index.html"
+    content: |
+      <html>
+        <h1>Servidor protegido con AppArmor</h1>
+      </html>
+    owner: www-data
+    group: www-data
+    mode: '0644'
+
+- name: Configurar virtualhost nginx
+  template:
+    src: site.conf.j2
+    dest: "/etc/nginx/sites-available/{{ nginx_site_name }}"
+  notify: Restart nginx
+  
+- name: Desactivar default site
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Restart nginx
+
+- name: Asegurar permisos correctos en logs
+  file:
+    path: "{{nginx_log_dir}}"
+    state: directory
+    owner: root
+    group: adm
+    mode: '0775'
+    
+- name: Añadir www-data al grupo adm
+  user:
+    name: www-data
+    groups: adm
+    append: yes
+
+- name: Crear archivos de log si no existen
+  file:
+    path: "{{nginx_log_dir}}/error.log"
+    state: touch
+    owner: www-data
+    group: adm
+    mode: '0640'
+    
+- name: Crear archivo access.log
+  file:
+    path: "{{nginx_log_dir}}/access.log"
+    state: touch
+    owner: www-data
+    group: adm
+    mode: '0640'
+    
+- name: Crear archivos de log si no existen
+  file:
+    path: "{{nginx_log_dir}}/{{nginx_site_name}}.error.log"
+    state: touch
+    owner: www-data
+    group: adm
+    mode: '0640'
+    
+- name: Crear archivo access.log
+  file:
+    path: "{{nginx_log_dir}}/{{nginx_site_name}}.access.log"
+    state: touch
+    owner: www-data
+    group: adm
+    mode: '0640'
+    
+- name: Activar sitio
+  file:
+    src: "/etc/nginx/sites-available/{{ nginx_site_name }}"
+    dest: "/etc/nginx/sites-enabled/{{ nginx_site_name }}"
+    state: link
+  notify: Restart nginx
+
+- name: Instalar perfil AppArmor básico para nginx
+  template:
+    src: apparmor_nginx.j2
+    dest: /etc/apparmor.d/usr.sbin.nginx
+  notify:
+    - Reload AppArmor
+    - Set AppArmor mode
+    - Restart nginx

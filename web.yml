@@ -1,0 +1,6 @@
+---
+  - name: "Web"
+    hosts: servidores
+    become: yes
+    roles:
+      - nginx_apparmor
