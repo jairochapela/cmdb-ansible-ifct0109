@@ -289,33 +289,40 @@ El perfil restringe qué recursos puede acceder el proceso `/usr/sbin/nginx`:
 ```
 #include <tunables/global>
 
-profile usr.sbin.nginx /usr/sbin/nginx {
+/usr/sbin/nginx {
+ #include <abstractions/base>
+ #include <abstractions/dovecot-common>
+ #include <abstractions/nameservice>
+ #include <abstractions/nis>
+ #include <abstractions/openssl>
+ #include <abstractions/postfix-common>
 
-  # Permisos básicos del sistema
-  #include <abstractions/base>
-  #include <abstractions/nameservice>
+ capability dac_override,
 
-  # Configuración nginx
-  /etc/nginx/** r,
+ /usr/sbin/nginx mr,
+ {{ nginx_log_dir }}/* w,
+ {{ nginx_log_dir }}/access.log w,
+ {{ nginx_log_dir }}/error.log w,
+ {{ nginx_root_dir }}/* r,
+ owner /etc/nginx/* r,
+ owner /etc/nginx/conf.d/ r,
+ owner /etc/nginx/modules-enabled/ r,
+ /etc/nginx/sites-available/ r,
+ /etc/nginx/sites-available/* r,
+ /etc/nginx/sites-enabled/ r,
+ /etc/nginx/sites-enabled/* r,
+ owner /proc/sys/kernel/random/boot_id r,
+ owner /run/nginx.pid rw,
+ owner /usr/share/nginx/modules-available/* r,
+ 
+ # Permitir red TCP
+ network inet stream,
+ network inet6 stream,
 
-  /run/nginx.pid rw,
-
-  # Directorio web
-  {{ nginx_root_dir }}/ r,
-  {{ nginx_root_dir }}/** r,
-
-  # Logs
-  {{ nginx_log_dir }}/ r,
-  {{ nginx_log_dir }}/** rw,
-
-  # Permitir red TCP
-  network inet stream,
-  network inet6 stream,
-
-  # Denegaciones explícitas formativas
-  deny /home/** rw,
-  deny /root/** rw,
-  deny /etc/shadow r,
+ # Denegaciones explícitas formativas
+ deny /home/** rw,
+ deny /root/** rw,
+ deny /etc/shadow r,
 }
 ```
 
